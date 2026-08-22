@@ -1,0 +1,93 @@
+# ==============================================================================
+# GITLAB CI/CD PIPELINE CONFIGURATION (OPTIONAL ALTERNATIVE)
+# ==============================================================================
+# Mirrors the GitHub Actions workflow design using stages.
+# Ensure that your GitLab Runner is tagged 'on-prem-netops' to execute on-premises
+# with reachability to the CML or vManage controllers.
+# ==============================================================================
+
+stages:
+  - validate
+  - plan
+  - deploy
+  - drift
+
+# Global configuration defaults
+default:
+  image: hashicorp/terraform:1.5.0
+  tags:
+    - on-prem-netops # Directs jobs to local on-premises runners
+
+# ==============================================================================
+# STAGE 1: VALIDATION & LINTING
+# ==============================================================================
+lint_and_validate:
+  stage: validate
+  script:
+    - terraform fmt -check -recursive
+    - cd environments/dev
+    - terraform init -backend=false
+    - terraform validate
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ==============================================================================
+# STAGE 2: PRE-DEPLOYMENT PLAN
+# ==============================================================================
+terraform_plan:
+  stage: plan
+  script:
+    - cd environments/dev
+    - terraform init
+    - terraform plan -no-color -out=tfplan
+  variables:
+    # Environment variables securely mapped from GitLab CI/CD Variables
+    SDWAN_URL: $SDWAN_URL_DEV
+    SDWAN_USERNAME: $SDWAN_USERNAME_DEV
+    SDWAN_PASSWORD: $SDWAN_PASSWORD_DEV
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+# ==============================================================================
+# STAGE 3: DEPLOYMENT (Manual Approval Gate)
+# ==============================================================================
+terraform_apply:
+  stage: deploy
+  script:
+    - cd environments/dev
+    - terraform init
+    - terraform apply -auto-approve
+  variables:
+    SDWAN_URL: $SDWAN_URL_DEV
+    SDWAN_USERNAME: $SDWAN_USERNAME_DEV
+    SDWAN_PASSWORD: $SDWAN_PASSWORD_DEV
+  environment:
+    name: dev-gate
+  when: manual # Requires explicit manual confirmation button inside GitLab
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ==============================================================================
+# STAGE 4: SCHEDULED DRIFT DETECTION
+# ==============================================================================
+drift_detection:
+  stage: drift
+  script:
+    - cd environments/dev
+    - terraform init
+    - |
+      terraform plan -detailed-exitcode -no-color
+      EXIT_CODE=$?
+      if [ $EXIT_CODE -eq 2 ]; then
+        echo "DRIFT DETECTED!"
+        # Insert webhook notification curl call here
+        exit 2
+      fi
+  variables:
+    SDWAN_URL: $SDWAN_URL_DEV
+    SDWAN_USERNAME: $SDWAN_USERNAME_DEV
+    SDWAN_PASSWORD: $SDWAN_PASSWORD_DEV
+  rules:
+    # Run only on scheduled cron jobs
+    - if: $CI_PIPELINE_SOURCE == "schedule"

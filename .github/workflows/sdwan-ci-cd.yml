@@ -1,0 +1,126 @@
+name: Cisco Catalyst SD-WAN CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'environments/dev/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'environments/dev/**'
+
+jobs:
+  # ============================================================================
+  # STAGE 1: VALIDATION & LINTING
+  # ============================================================================
+  validate:
+    name: Code Linting & Validation
+    runs-on: ubuntu-latest # Can run on standard public runner for static analysis
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Set up Python for YAML linting
+        uses: actions/setup-python@v4
+        with:
+          python-size: '3.10'
+
+      - name: Install Yamllint
+        run: pip install yamllint
+
+      - name: YAML Linting
+        run: yamllint environments/dev/data/
+
+  # ============================================================================
+  # STAGE 2: PRE-DEPLOYMENT PLAN (Runs on Pull Requests)
+  # ============================================================================
+  plan:
+    name: Pre-Deployment Plan & Diff
+    needs: validate
+    if: github.event_name == 'pull_request'
+    # Target our on-premises runner which has network connectivity to CML/SD-WAN Manager
+    runs-on: [self-hosted, on-prem-netops]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }} # TFC state token
+
+      - name: Terraform Init
+        run: |
+          cd environments/dev
+          terraform init
+
+      - name: Terraform Plan
+        id: plan
+        # Credentials are fed from GitHub secrets as environment variables
+        env:
+          SDWAN_URL: ${{ secrets.SDWAN_URL_DEV }}
+          SDWAN_USERNAME: ${{ secrets.SDWAN_USERNAME_DEV }}
+          SDWAN_PASSWORD: ${{ secrets.SDWAN_PASSWORD_DEV }}
+        run: |
+          cd environments/dev
+          terraform plan -no-color -out=tfplan
+
+      - name: Publish Plan Summary as PR Comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            // Normally we'd format the output of `terraform show` here
+            const output = `### Cisco SD-WAN Dev Environment Plan Summary\n* Plan generated successfully against local CML Sandbox controllers.\n* Verify variables and IP changes prior to merging.`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+  # ============================================================================
+  # STAGE 3: DEPLOYMENT (Runs on Merge to Main)
+  # ============================================================================
+  deploy:
+    name: Apply Configuration Changes
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: [self-hosted, on-prem-netops]
+    # Restricts deployment to environment gates requiring manual approval in GitHub Actions
+    environment: dev-gate
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        run: |
+          cd environments/dev
+          terraform init
+
+      - name: Terraform Apply
+        env:
+          SDWAN_URL: ${{ secrets.SDWAN_URL_DEV }}
+          SDWAN_USERNAME: ${{ secrets.SDWAN_USERNAME_DEV }}
+          SDWAN_PASSWORD: ${{ secrets.SDWAN_PASSWORD_DEV }}
+        run: |
+          cd environments/dev
+          terraform apply -auto-approve

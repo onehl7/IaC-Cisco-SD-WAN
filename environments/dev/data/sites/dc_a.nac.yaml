@@ -1,0 +1,79 @@
+# ==============================================================================
+# SITE DECLARATION: DATA CENTER A
+# ==============================================================================
+# Maps the dual C8500 core/aggregation routers for DC A.
+# Configured with eBGP neighbors towards the local Nexus core switches.
+# ==============================================================================
+---
+sites:
+  - site_id: 1
+    name: "DC_A"
+    configuration_group: "DC_Cluster_Group"
+    devices:
+      # ========================================================================
+      # DC A - Router 1
+      # ========================================================================
+      - hostname: "dca-c8500-1"
+        device_model: "Catalyst C8500-12X4QC"
+        serial_number: "C-8500-DCA1"
+        system_ip: "172.16.255.11" # Logical loopback
+        variables:
+          # Out-of-Band (VPN 512)
+          vpn512_mgmt_ip: "192.168.10.11/24"
+          vpn512_mgmt_gateway: "192.168.10.1"
+          
+          # WAN Transport (VPN 0) - Static gateway IP references
+          vpn0_ge1_ip: "192.0.2.11/24"
+          vpn0_ge1_gateway: "192.0.2.1"
+          vpn0_ge2_ip: "198.51.100.11/24"
+          vpn0_ge2_gateway: "198.51.100.1"
+          
+          # LAN Routing Protocol - eBGP ASN setup
+          bgp_as: 65001
+          bgp_remote_as: 65100 # Local DC Core switches ASN
+          
+          # Corp Segment (VPN 10) -> DC Core peering
+          vpn10_lan_ip: "10.10.10.2/24"
+          vpn10_bgp_neighbor_ip: "10.10.10.1"
+          
+          # Guest Segment (VPN 20) -> DC Core peering
+          vpn20_lan_ip: "10.10.20.2/24"
+          vpn20_bgp_neighbor_ip: "10.10.20.1"
+          
+          # IoT Segment (VPN 30) -> DC Core peering
+          vpn30_lan_ip: "10.10.30.2/24"
+          vpn30_bgp_neighbor_ip: "10.10.30.1"
+
+      # ========================================================================
+      # DC A - Router 2
+      # ========================================================================
+      - hostname: "dca-c8500-2"
+        device_model: "Catalyst C8500-12X4QC"
+        serial_number: "C-8500-DCA2"
+        system_ip: "172.16.255.12"
+        variables:
+          # Out-of-Band (VPN 512)
+          vpn512_mgmt_ip: "192.168.10.12/24"
+          vpn512_mgmt_gateway: "192.168.10.1"
+          
+          # WAN Transport (VPN 0)
+          vpn0_ge1_ip: "192.0.2.12/24"
+          vpn0_ge1_gateway: "192.0.2.1"
+          vpn0_ge2_ip: "198.51.100.12/24"
+          vpn0_ge2_gateway: "198.51.100.1"
+          
+          # LAN Routing
+          bgp_as: 65001
+          bgp_remote_as: 65100
+          
+          # Corp Segment (VPN 10)
+          vpn10_lan_ip: "10.10.10.3/24"
+          vpn10_bgp_neighbor_ip: "10.10.10.1"
+          
+          # Guest Segment (VPN 20)
+          vpn20_lan_ip: "10.10.20.3/24"
+          vpn20_bgp_neighbor_ip: "10.10.20.1"
+          
+          # IoT Segment (VPN 30)
+          vpn30_lan_ip: "10.10.30.3/24"
+          vpn30_bgp_neighbor_ip: "10.10.30.1"

@@ -1,0 +1,23 @@
+# ==============================================================================
+# MANAGEMENT FEATURE PROFILE (VPN 512)
+# ==============================================================================
+# Configures the isolated Out-of-Band (OOB) management interface.
+# By default, all management traffic (SSH/HTTPS) is routed through this VRF.
+# ==============================================================================
+---
+feature_profiles:
+  - name: "Management_OOB_Profile"
+    description: "Out-Of-Band Management configuration for VPN 512"
+    type: "management"
+    
+    vpn_512:
+      # OOB management network default route
+      static_routes:
+        - prefix: "0.0.0.0/0"
+          next_hop: "vpn512_mgmt_gateway" # Resolved from site-specific variables
+          
+      interfaces:
+        - name: "GigabitEthernet0" # Standard OOB management interface on Catalyst 8000
+          description: "OOB LAN Management Connection"
+          ip_address: "vpn512_mgmt_ip" # Resolved from site-specific variables
+          no_shutdown: true

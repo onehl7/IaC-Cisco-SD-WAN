@@ -1,0 +1,15 @@
+# ==============================================================================
+# CONFIGURATION GROUP: BRANCH LARGE
+# ==============================================================================
+# Binds profiles together for our Catalyst C8355-G2 branch routers.
+# Uses the OSPF-enabled LAN Service profile.
+# ==============================================================================
+---
+configuration_groups:
+  - name: "Branch_Large_Group"
+    description: "Configuration Group for Large Sites (Catalyst C8355-G2 Routers)"
+    profiles:
+      - name: "System_Base_Profile"
+      - name: "Transport_WAN_Profile"
+      - name: "Management_OOB_Profile"
+      - name: "Service_Branch_LAN_Profile"

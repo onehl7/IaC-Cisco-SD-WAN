@@ -1,0 +1,33 @@
+# ==============================================================================
+# CENTRALIZED OVERLAY CONTROL & DATA POLICIES
+# ==============================================================================
+# Configures global policies executed on the vSmart controller.
+# Defines traffic engineering, VPN isolation, and link selection (AAR).
+# ==============================================================================
+---
+policies:
+  centralized:
+    - name: "Central_SDWAN_Policy"
+      description: "Default Central Policy for Traffic Engineering & Link Steering"
+      
+      # Application-Aware Routing (AAR) Rules
+      # Steers latency-sensitive traffic (like voice/Corp data) or non-critical traffic.
+      app_aware_routing:
+        - name: "Corp_Data_AAR"
+          rules:
+            - sequence: 10
+              match:
+                dscp: 46 # EF Traffic Class (Voice)
+              action:
+                # Direct voice over MPLS preferred, with failover to Business Internet
+                preferred_colors:
+                  - "mpls"
+                backup_colors:
+                  - "biz-internet"
+                sla_class: "Voice_SLA_Class"
+                
+      sla_classes:
+        - name: "Voice_SLA_Class"
+          loss: 1         # Max 1% packet loss
+          latency: 150    # Max 150ms latency
+          jitter: 10      # Max 10ms jitter

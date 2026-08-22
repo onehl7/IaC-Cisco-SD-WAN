@@ -1,0 +1,50 @@
+# ==============================================================================
+# TRANSPORT FEATURE PROFILE (VPN 0)
+# ==============================================================================
+# Configures external-facing WAN links, tunnel interfaces, and underlay routing.
+# These physical interfaces terminate MPLS and Business Internet tunnels.
+# ==============================================================================
+---
+feature_profiles:
+  - name: "Transport_WAN_Profile"
+    description: "Transport configuration for Dual-WAN Uplinks (MPLS and Biz Internet)"
+    type: "transport"
+    
+    vpn_0:
+      # Static default route allocations for the WAN carrier networks.
+      # Gateway IPs are resolved dynamically from site variables.
+      static_routes:
+        - prefix: "0.0.0.0/0"
+          next_hop: "vpn0_ge1_gateway" # Resolved from site-specific values
+        - prefix: "0.0.0.0/0"
+          next_hop: "vpn0_ge2_gateway" # Resolved from site-specific values
+
+      interfaces:
+        # --- MPLS WAN Interface ---
+        - name: "GigabitEthernet1"
+          description: "WAN Uplink - MPLS Provider"
+          tunnel_interface:
+            color: "mpls"
+            encapsulation: "ipsec"
+            # Allow basic services over the secure tunnel
+            allow_service:
+              - "dns"
+              - "ntp"
+              - "netconf"
+          # Interface IP is parameterized per router
+          ip_address: "vpn0_ge1_ip"
+
+        # --- Business Internet WAN Interface ---
+        - name: "GigabitEthernet2"
+          description: "WAN Uplink - Business Internet"
+          tunnel_interface:
+            color: "biz-internet"
+            encapsulation: "ipsec"
+            # Permit DHCP lease negotiations and DNS lookups
+            allow_service:
+              - "dhcp"
+              - "dns"
+              - "ntp"
+              - "netconf"
+          # Interface IP is parameterized per router (either static or DHCP)
+          ip_address: "vpn0_ge2_ip"

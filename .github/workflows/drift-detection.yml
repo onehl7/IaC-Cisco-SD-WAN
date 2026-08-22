@@ -1,0 +1,63 @@
+name: Scheduled Configuration Drift Detection
+
+on:
+  schedule:
+    # Runs daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allows manual trigger of drift check
+
+jobs:
+  drift_check:
+    name: Detect Fabric Config Drift
+    runs-on: [self-hosted, on-prem-netops]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        run: |
+          cd environments/dev
+          terraform init
+
+      - name: Drift Detection Check
+        id: drift
+        env:
+          SDWAN_URL: ${{ secrets.SDWAN_URL_DEV }}
+          SDWAN_USERNAME: ${{ secrets.SDWAN_USERNAME_DEV }}
+          SDWAN_PASSWORD: ${{ secrets.SDWAN_PASSWORD_DEV }}
+        # terraform plan -detailed-exitcode returns:
+        # 0: Succeeded with empty diff (no changes)
+        # 1: Succeeded with error (plan failed)
+        # 2: Succeeded with non-empty diff (drift detected!)
+        run: |
+          cd environments/dev
+          set +e
+          terraform plan -detailed-exitcode -no-color
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          if [ $EXIT_CODE -eq 2 ]; then
+            echo "DRIFT DETECTED: Local configurations have drifted from state definition."
+            exit 2
+          elif [ $EXIT_CODE -eq 1 ]; then
+            echo "ERROR: Plan generation failed."
+            exit 1
+          else
+            echo "SUCCESS: Configuration is in sync."
+            exit 0
+          fi
+
+      - name: Alert on Config Drift
+        if: failure() && steps.drift.outputs.exit_code == '2'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          # Send payload alerting NetOps team on Slack channel
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🚨 *SD-WAN IaC Alert*: Configuration drift detected in Dev/CML environment! Please review the latest drift detection execution log."}' \
+            $SLACK_WEBHOOK_URL

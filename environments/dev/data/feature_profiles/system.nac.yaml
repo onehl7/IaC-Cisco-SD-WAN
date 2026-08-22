@@ -1,0 +1,21 @@
+# ==============================================================================
+# SYSTEM FEATURE PROFILE
+# ==============================================================================
+# Configures global device parameters such as timezone and loopback interfaces.
+# System IP and Hostname are mapped dynamically from site definitions.
+# ==============================================================================
+---
+feature_profiles:
+  - name: "System_Base_Profile"
+    description: "Standard System Configuration for Catalyst 8000 Routers"
+    type: "system"
+    system:
+      # Use UTC timezone for standardized logs across all regions
+      timezone: "UTC"
+      
+      # Admin AAA / Local User accounts definition
+      users:
+        - username: "admin"
+          role: "admin"
+          
+      # Loopback tracking features can be added here
