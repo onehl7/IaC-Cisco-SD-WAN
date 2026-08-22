@@ -5,75 +5,78 @@
 # Configured with eBGP neighbors towards the local Nexus core switches.
 # ==============================================================================
 ---
-sites:
-  - site_id: 2
-    name: "DC_B"
-    configuration_group: "DC_Cluster_Group"
-    devices:
-      # ========================================================================
-      # DC B - Router 1
-      # ========================================================================
-      - hostname: "dcb-c8500-1"
-        device_model: "Catalyst C8500-12X4QC"
-        serial_number: "C-8500-DCB1"
-        system_ip: "172.16.255.21" # Logical loopback
-        variables:
-          # Out-of-Band (VPN 512)
-          vpn512_mgmt_ip: "192.168.20.11/24"
-          vpn512_mgmt_gateway: "192.168.20.1"
-          
-          # WAN Transport (VPN 0)
-          vpn0_ge1_ip: "192.0.2.21/24"
-          vpn0_ge1_gateway: "192.0.2.1"
-          vpn0_ge2_ip: "198.51.100.21/24"
-          vpn0_ge2_gateway: "198.51.100.1"
-          
-          # LAN Routing Protocol - eBGP ASN setup
-          bgp_as: 65002
-          bgp_remote_as: 65200 # Local DC B Core switches ASN
-          
-          # Corp Segment (VPN 10)
-          vpn10_lan_ip: "10.20.10.2/24"
-          vpn10_bgp_neighbor_ip: "10.20.10.1"
-          
-          # Guest Segment (VPN 20)
-          vpn20_lan_ip: "10.20.20.2/24"
-          vpn20_bgp_neighbor_ip: "10.20.20.1"
-          
-          # IoT Segment (VPN 30)
-          vpn30_lan_ip: "10.20.30.2/24"
-          vpn30_bgp_neighbor_ip: "10.20.30.1"
+sdwan:
+  sites:
+    - id: 2
+      routers:
+        # ========================================================================
+        # DC B - Router 1
+        # ========================================================================
+        - chassis_id: "C-8500-DCB1"
+          configuration_group: "DC_Cluster_Group"
+          device_variables:
+            host_name: "dcb-c8500-1"
+            system_ip: "172.16.255.21"
+            site_id: 2
+            
+            # Out-of-Band (VPN 512)
+            vpn512_mgmt_ip: "192.168.20.11/24"
+            vpn512_mgmt_gateway: "192.168.20.1"
+            
+            # WAN Transport (VPN 0)
+            vpn0_ge1_ip: "192.0.2.21/24"
+            vpn0_ge1_gateway: "192.0.2.1"
+            vpn0_ge2_ip: "198.51.100.21/24"
+            vpn0_ge2_gateway: "198.51.100.1"
+            
+            # LAN Routing
+            bgp_as: 65002
+            bgp_remote_as: 65200 # DC B Core switches ASN
+            
+            # Corp Segment (VPN 10)
+            vpn10_lan_ip: "10.20.10.2/24"
+            vpn10_bgp_neighbor_ip: "10.20.10.1"
+            
+            # Guest Segment (VPN 20)
+            vpn20_lan_ip: "10.20.20.2/24"
+            vpn20_bgp_neighbor_ip: "10.20.20.1"
+            
+            # IoT Segment (VPN 30)
+            vpn30_lan_ip: "10.20.30.2/24"
+            vpn30_bgp_neighbor_ip: "10.20.30.1"
 
-      # ========================================================================
-      # DC B - Router 2
-      # ========================================================================
-      - hostname: "dcb-c8500-2"
-        device_model: "Catalyst C8500-12X4QC"
-        serial_number: "C-8500-DCB2"
-        system_ip: "172.16.255.22"
-        variables:
-          # Out-of-Band (VPN 512)
-          vpn512_mgmt_ip: "192.168.20.12/24"
-          vpn512_mgmt_gateway: "192.168.20.1"
-          
-          # WAN Transport (VPN 0)
-          vpn0_ge1_ip: "192.0.2.22/24"
-          vpn0_ge1_gateway: "192.0.2.1"
-          vpn0_ge2_ip: "198.51.100.22/24"
-          vpn0_ge2_gateway: "198.51.100.1"
-          
-          # LAN Routing
-          bgp_as: 65002
-          bgp_remote_as: 65200
-          
-          # Corp Segment (VPN 10)
-          vpn10_lan_ip: "10.20.10.3/24"
-          vpn10_bgp_neighbor_ip: "10.20.10.1"
-          
-          # Guest Segment (VPN 20)
-          vpn20_lan_ip: "10.20.20.3/24"
-          vpn20_bgp_neighbor_ip: "10.20.20.1"
-          
-          # IoT Segment (VPN 30)
-          vpn30_lan_ip: "10.20.30.3/24"
-          vpn30_bgp_neighbor_ip: "10.20.30.1"
+        # ========================================================================
+        # DC B - Router 2
+        # ========================================================================
+        - chassis_id: "C-8500-DCB2"
+          configuration_group: "DC_Cluster_Group"
+          device_variables:
+            host_name: "dcb-c8500-2"
+            system_ip: "172.16.255.22"
+            site_id: 2
+            
+            # Out-of-Band (VPN 512)
+            vpn512_mgmt_ip: "192.168.20.12/24"
+            vpn512_mgmt_gateway: "192.168.20.1"
+            
+            # WAN Transport (VPN 0)
+            vpn0_ge1_ip: "192.0.2.22/24"
+            vpn0_ge1_gateway: "192.0.2.1"
+            vpn0_ge2_ip: "198.51.100.22/24"
+            vpn0_ge2_gateway: "198.51.100.1"
+            
+            # LAN Routing
+            bgp_as: 65002
+            bgp_remote_as: 65200
+            
+            # Corp Segment (VPN 10)
+            vpn10_lan_ip: "10.20.10.3/24"
+            vpn10_bgp_neighbor_ip: "10.20.10.1"
+            
+            # Guest Segment (VPN 20)
+            vpn20_lan_ip: "10.20.20.3/24"
+            vpn20_bgp_neighbor_ip: "10.20.20.1"
+            
+            # IoT Segment (VPN 30)
+            vpn30_lan_ip: "10.20.30.3/24"
+            vpn30_bgp_neighbor_ip: "10.20.30.1"

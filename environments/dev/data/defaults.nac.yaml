@@ -1,29 +1,40 @@
 # ==============================================================================
-# GLOBAL FABRIC BASELINE DEFAULTS
+# GLOBAL FABRIC BASELINE DEFAULTS - INSTRUCTIONAL TEMPLATE
 # ==============================================================================
 # NOTE: The values below are global configurations applied as default backups
 # for all devices. These values are subject to change based on enterprise policy.
+#
+# REFERENCE IP ADDRESS & CIDR SCHEME ARCHITECTURE:
+# - Out-of-Band (OOB) Mgmt (VPN 512):
+#   - Datacenters: 192.168.10.0/24 (DC A), 192.168.20.0/24 (DC B)
+#   - Branches: 192.168.SiteID.0/24 (e.g. 192.168.101.0/24 for Site 101)
+# - WAN Transport Uplinks (VPN 0):
+#   - MPLS Simulator Cloud: 192.0.2.0/24 subnet (e.g. 192.0.2.11 for DC A R1)
+#   - Internet Simulator Cloud: 198.51.100.0/24 subnet (e.g. 198.51.100.11 for DC A R1)
+# - LAN Service VPNs (Corp/Guest/IoT):
+#   - Corporate (VPN 10): 10.SiteID.10.0/24 (Branches), 10.10.10.0/24 (DC A), 10.20.10.0/24 (DC B)
+#   - Guest (VPN 20):     10.SiteID.20.0/24 (Branches), 10.10.20.0/24 (DC A), 10.20.20.0/24 (DC B)
+#   - IoT (VPN 30):       10.SiteID.30.0/24 (Branches), 10.10.30.0/24 (DC A), 10.20.30.0/24 (DC B)
 # ==============================================================================
 ---
-defaults:
-  # Cisco Catalyst SD-WAN Fabric Identification
-  organization_name: "Enterprise-SDWAN-Dev"
-  vbond_address: "192.0.2.5" # Public or DMZ IP address of the vBond Orchestrator
-  overlay_id: 1
+sdwan:
+  defaults:
+    # Cisco Catalyst SD-WAN Fabric Identification
+    organization_name: "Enterprise-SDWAN-Dev"
+    vbond_address: "192.0.2.5" # Public or DMZ IP address of the vBond Orchestrator
+    overlay_id: 1
 
-  # Global System Parameter Baselines
-  timezone: "UTC"
+    # Global System Parameter Baselines
+    timezone: "UTC"
 
-  # Domain Name System (DNS) Servers
-  # Primary and secondary resolvers used by standard routing templates.
-  # Adjust according to local branch ISP and datacenter internal DNS requirements.
-  dns_servers:
-    - "8.8.8.8" # Google Public DNS (Primary - placeholder)
-    - "1.1.1.1" # Cloudflare Public DNS (Secondary - placeholder)
+    # Domain Name System (DNS) Servers
+    # Primary and secondary resolvers used by standard routing templates.
+    dns_servers:
+      - "8.8.8.8" # Google Public DNS
+      - "1.1.1.1" # Cloudflare Public DNS
 
-  # Network Time Protocol (NTP) Servers
-  # Synchronizes clocks across the entire SD-WAN fabric.
-  # Crucial for PKI certificate verification and DTLS handshakes.
-  ntp_servers:
-    - "time.google.com" # NTP Source 1 (Subject to change)
-    - "pool.ntp.org"    # NTP Source 2 (Subject to change)
+    # Network Time Protocol (NTP) Servers
+    # Synchronizes clocks across the entire SD-WAN fabric.
+    ntp_servers:
+      - "time.google.com" # NTP Source 1
+      - "pool.ntp.org"    # NTP Source 2

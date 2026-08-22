@@ -1,89 +1,92 @@
 # ==============================================================================
-# SITE DECLARATION: BRANCH 2 (ATLANTA)
+# SITE DECLARATION: BRANCH 102 (Medium Branch)
 # ==============================================================================
-# Maps the dual Catalyst C8235-G2 secure routers for Atlanta.
-# Configured with VRRP on service interfaces and OSPF peerings to local border switches.
+# Maps the dual C8235-G2 secure routers for Site 102.
+# Configures VRRP default gateways and OSPF peerings with border switches.
 # ==============================================================================
 ---
-sites:
-  - site_id: 102
-    name: "Atlanta_Branch"
-    configuration_group: "Branch_Medium_Group"
-    devices:
-      # ========================================================================
-      # Branch 2 - Router 1 (Master)
-      # ========================================================================
-      - hostname: "br102-c8235-1"
-        device_model: "C8235-G2"
-        serial_number: "C-8235-102A"
-        system_ip: "172.16.255.103"
-        variables:
-          # Out-of-Band (VPN 512)
-          vpn512_mgmt_ip: "192.168.102.11/24"
-          vpn512_mgmt_gateway: "192.168.102.1"
-          
-          # WAN Transport (VPN 0)
-          vpn0_ge1_ip: "192.0.2.103/24"
-          vpn0_ge1_gateway: "192.0.2.1"
-          vpn0_ge2_ip: "198.51.100.103/24"
-          vpn0_ge2_gateway: "198.51.100.1"
-          
-          # LAN Routing
-          ospf_area: "0.0.0.0"
-          
-          # Corp Segment (VPN 10)
-          vpn10_lan_ip: "10.102.10.2/24"
-          vpn10_vrrp_group: 10
-          vpn10_vrrp_priority: 110
-          vpn10_vrrp_vip: "10.102.10.1"
-          
-          # Guest Segment (VPN 20)
-          vpn20_lan_ip: "10.102.20.2/24"
-          vpn20_vrrp_group: 20
-          vpn20_vrrp_priority: 110
-          vpn20_vrrp_vip: "10.102.20.1"
-          
-          # IoT Segment (VPN 30)
-          vpn30_lan_ip: "10.102.30.2/24"
-          vpn30_vrrp_group: 30
-          vpn30_vrrp_priority: 110
-          vpn30_vrrp_vip: "10.102.30.1"
+sdwan:
+  sites:
+    - id: 102
+      routers:
+        # ========================================================================
+        # Branch 102 - Router 1 (VRRP Master)
+        # ========================================================================
+        - chassis_id: "C-8235-BR102-R1"
+          configuration_group: "Branch_Medium_Group"
+          device_variables:
+            host_name: "br102-c8235-1"
+            system_ip: "172.16.255.103"
+            site_id: 102
+            
+            # Out-of-Band (VPN 512)
+            vpn512_mgmt_ip: "192.168.102.11/24"
+            vpn512_mgmt_gateway: "192.168.102.1"
+            
+            # WAN Transport (VPN 0)
+            vpn0_ge1_ip: "192.0.2.103/24"
+            vpn0_ge1_gateway: "192.0.2.254"
+            vpn0_ge2_ip: "198.51.100.103/24"
+            vpn0_ge2_gateway: "198.51.100.254"
+            
+            # OSPF LAN Routing
+            ospf_area: "0.0.0.0"
+            
+            # Corp Segment (VPN 10)
+            vpn10_lan_ip: "10.102.10.2/24"
+            vpn10_vrrp_group: 10
+            vpn10_vrrp_priority: 110
+            vpn10_vrrp_vip: "10.102.10.1"
+            
+            # Guest Segment (VPN 20)
+            vpn20_lan_ip: "10.102.20.2/24"
+            vpn20_vrrp_group: 20
+            vpn20_vrrp_priority: 110
+            vpn20_vrrp_vip: "10.102.20.1"
+            
+            # IoT Segment (VPN 30)
+            vpn30_lan_ip: "10.102.30.2/24"
+            vpn30_vrrp_group: 30
+            vpn30_vrrp_priority: 110
+            vpn30_vrrp_vip: "10.102.30.1"
 
-      # ========================================================================
-      # Branch 2 - Router 2 (Backup)
-      # ========================================================================
-      - hostname: "br102-c8235-2"
-        device_model: "C8235-G2"
-        serial_number: "C-8235-102B"
-        system_ip: "172.16.255.104"
-        variables:
-          # Out-of-Band (VPN 512)
-          vpn512_mgmt_ip: "192.168.102.12/24"
-          vpn512_mgmt_gateway: "192.168.102.1"
-          
-          # WAN Transport (VPN 0)
-          vpn0_ge1_ip: "192.0.2.104/24"
-          vpn0_ge1_gateway: "192.0.2.1"
-          vpn0_ge2_ip: "198.51.100.104/24"
-          vpn0_ge2_gateway: "198.51.100.1"
-          
-          # LAN Routing
-          ospf_area: "0.0.0.0"
-          
-          # Corp Segment (VPN 10)
-          vpn10_lan_ip: "10.102.10.3/24"
-          vpn10_vrrp_group: 10
-          vpn10_vrrp_priority: 100
-          vpn10_vrrp_vip: "10.102.10.1"
-          
-          # Guest Segment (VPN 20)
-          vpn20_lan_ip: "10.102.20.3/24"
-          vpn20_vrrp_group: 20
-          vpn20_vrrp_priority: 100
-          vpn20_vrrp_vip: "10.102.20.1"
-          
-          # IoT Segment (VPN 30)
-          vpn30_lan_ip: "10.102.30.3/24"
-          vpn30_vrrp_group: 30
-          vpn30_vrrp_priority: 100
-          vpn30_vrrp_vip: "10.102.30.1"
+        # ========================================================================
+        # Branch 102 - Router 2 (VRRP Backup)
+        # ========================================================================
+        - chassis_id: "C-8235-BR102-R2"
+          configuration_group: "Branch_Medium_Group"
+          device_variables:
+            host_name: "br102-c8235-2"
+            system_ip: "172.16.255.104"
+            site_id: 102
+            
+            # Out-of-Band (VPN 512)
+            vpn512_mgmt_ip: "192.168.102.12/24"
+            vpn512_mgmt_gateway: "192.168.102.1"
+            
+            # WAN Transport (VPN 0)
+            vpn0_ge1_ip: "192.0.2.104/24"
+            vpn0_ge1_gateway: "192.0.2.254"
+            vpn0_ge2_ip: "198.51.100.104/24"
+            vpn0_ge2_gateway: "198.51.100.254"
+            
+            # OSPF LAN Routing
+            ospf_area: "0.0.0.0"
+            
+            # Corp Segment (VPN 10)
+            vpn10_lan_ip: "10.102.10.3/24"
+            vpn10_vrrp_group: 10
+            vpn10_vrrp_priority: 100
+            vpn10_vrrp_vip: "10.102.10.1"
+            
+            # Guest Segment (VPN 20)
+            vpn20_lan_ip: "10.102.20.3/24"
+            vpn20_vrrp_group: 20
+            vpn20_vrrp_priority: 100
+            vpn20_vrrp_vip: "10.102.20.1"
+            
+            # IoT Segment (VPN 30)
+            vpn30_lan_ip: "10.102.30.3/24"
+            vpn30_vrrp_group: 30
+            vpn30_vrrp_priority: 100
+            vpn30_vrrp_vip: "10.102.30.1"

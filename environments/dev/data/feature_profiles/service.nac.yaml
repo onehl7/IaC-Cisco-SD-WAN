@@ -1,142 +1,154 @@
 # ==============================================================================
-# SERVICE FEATURE PROFILES (VPN 10, 20, 30)
+# SERVICE FEATURE PROFILES (VPN 10, 20, 30) - INSTRUCTIONAL TEMPLATE
 # ==============================================================================
 # Configures internal corporate (Corp), guest (Guest), and IoT service networks.
 # - Branch profile configures OSPF for routes exchange with local border nodes.
 # - Datacenter profile configures eBGP for peering with DC Core Nexus switches.
+#
+# CUSTOMIZATION GUIDELINE:
+# - VPN IDs (10 = Corp, 20 = Guest, 30 = IoT) are standardized across the overlay.
+# - LAN port selections (GigabitEthernet3 = Corp, GigabitEthernet4 = Guest, 
+#   GigabitEthernet5 = IoT) are mapped to physical switches. Update interface names
+#   if your local switches connect to different router physical interfaces.
+# - OSPF processes redistribute OMP routes to push WAN-side subnets down to local switches.
+# - VRRP priorities (e.g. Master = 110, Backup = 100) are mapped dynamically 
+#   in the site files to avoid active-active traffic state splitting.
+# - BGP peerings (AS, Neighbor IP, Remote AS) are fully parameterized per-DC router.
 # ==============================================================================
 ---
-feature_profiles:
-  # ============================================================================
-  # BRANCH SERVICE PROFILE
-  # ============================================================================
-  - name: "Service_Branch_LAN_Profile"
-    description: "Service VPNs (10, 20, 30) for Branch Sites running OSPF"
-    type: "service"
-    
-    # --- Corporate VPN (Corp - VPN 10) ---
-    vpn_10:
-      name: "Corp"
-      description: "Enterprise Operations Segment"
-      interfaces:
-        - name: "GigabitEthernet3"
-          description: "LAN Interface - Corporate Network"
-          ip_address: "vpn10_lan_ip"
-          vrrp:
-            - group_id: "vpn10_vrrp_group"
-              priority: "vpn10_vrrp_priority"
-              virtual_ip: "vpn10_vrrp_vip"
-      ospf:
-        - process_id: 10
-          redistribute:
-            - protocol: "omp"
-          areas:
-            - area_id: "ospf_area"
-              interfaces:
-                - name: "GigabitEthernet3"
+sdwan:
+  feature_profiles:
+    service_profiles:
+      # ==========================================================================
+      # BRANCH SERVICE PROFILE (OSPF ENABLED)
+      # ==========================================================================
+      - name: "Service_Branch_LAN_Profile"
+        description: "Service VPNs (10, 20, 30) for Branch Sites running OSPF"
+        
+        service_vpn:
+          # --- Corporate VPN (Corp - VPN 10) ---
+          - vpn_id: 10
+            name: "Corp"
+            description: "Enterprise Operations Segment"
+            ethernet_interfaces:
+              - name: "GigabitEthernet3"
+                description: "LAN Interface - Corporate Network"
+                ip_address: "vpn10_lan_ip"
+                vrrp:
+                  - group_id: "vpn10_vrrp_group"
+                    priority: "vpn10_vrrp_priority"
+                    virtual_ip: "vpn10_vrrp_vip"
+            ospf:
+              - process_id: 10
+                redistribute:
+                  - protocol: "omp"
+                areas:
+                  - area_id: "ospf_area"
+                    interfaces:
+                      - name: "GigabitEthernet3"
 
-    # --- Guest VPN (Guest - VPN 20) ---
-    vpn_20:
-      name: "Guest"
-      description: "Guest Access Segment"
-      interfaces:
-        - name: "GigabitEthernet4"
-          description: "LAN Interface - Guest Network"
-          ip_address: "vpn20_lan_ip"
-          vrrp:
-            - group_id: "vpn20_vrrp_group"
-              priority: "vpn20_vrrp_priority"
-              virtual_ip: "vpn20_vrrp_vip"
-      ospf:
-        - process_id: 20
-          redistribute:
-            - protocol: "omp"
-          areas:
-            - area_id: "ospf_area"
-              interfaces:
-                - name: "GigabitEthernet4"
+          # --- Guest VPN (Guest - VPN 20) ---
+          - vpn_id: 20
+            name: "Guest"
+            description: "Guest Access Segment"
+            ethernet_interfaces:
+              - name: "GigabitEthernet4"
+                description: "LAN Interface - Guest Network"
+                ip_address: "vpn20_lan_ip"
+                vrrp:
+                  - group_id: "vpn20_vrrp_group"
+                    priority: "vpn20_vrrp_priority"
+                    virtual_ip: "vpn20_vrrp_vip"
+            ospf:
+              - process_id: 20
+                redistribute:
+                  - protocol: "omp"
+                areas:
+                  - area_id: "ospf_area"
+                    interfaces:
+                      - name: "GigabitEthernet4"
 
-    # --- IoT VPN (IoT - VPN 30) ---
-    vpn_30:
-      name: "IoT"
-      description: "IoT/BMS Segment"
-      interfaces:
-        - name: "GigabitEthernet5"
-          description: "LAN Interface - IoT Network"
-          ip_address: "vpn30_lan_ip"
-          vrrp:
-            - group_id: "vpn30_vrrp_group"
-              priority: "vpn30_vrrp_priority"
-              virtual_ip: "vpn30_vrrp_vip"
-      ospf:
-        - process_id: 30
-          redistribute:
-            - protocol: "omp"
-          areas:
-            - area_id: "ospf_area"
-              interfaces:
-                - name: "GigabitEthernet5"
+          # --- IoT VPN (IoT - VPN 30) ---
+          - vpn_id: 30
+            name: "IoT"
+            description: "IoT/BMS Segment"
+            ethernet_interfaces:
+              - name: "GigabitEthernet5"
+                description: "LAN Interface - IoT Network"
+                ip_address: "vpn30_lan_ip"
+                vrrp:
+                  - group_id: "vpn30_vrrp_group"
+                    priority: "vpn30_vrrp_priority"
+                    virtual_ip: "vpn30_vrrp_vip"
+            ospf:
+              - process_id: 30
+                redistribute:
+                  - protocol: "omp"
+                areas:
+                  - area_id: "ospf_area"
+                    interfaces:
+                      - name: "GigabitEthernet5"
 
-  # ============================================================================
-  # DATA CENTER SERVICE PROFILE
-  # ============================================================================
-  - name: "Service_DC_LAN_Profile"
-    description: "Service VPNs (10, 20, 30) for Data Centers running BGP"
-    type: "service"
+      # ==========================================================================
+      # DATA CENTER SERVICE PROFILE (BGP ENABLED)
+      # ==========================================================================
+      - name: "Service_DC_LAN_Profile"
+        description: "Service VPNs (10, 20, 30) for Data Centers running BGP"
+        
+        service_vpn:
+          # --- Corporate VPN (Corp - VPN 10) ---
+          - vpn_id: 10
+            name: "Corp"
+            description: "DC Corporate Core Segment"
+            ethernet_interfaces:
+              - name: "GigabitEthernet3"
+                description: "LAN Interface - DC Core Corp Network"
+                ip_address: "vpn10_lan_ip"
+            bgp:
+              as_number: "bgp_as"
+              router_id: "system_ip"
+              neighbors:
+                - ip_address: "vpn10_bgp_neighbor_ip"
+                  remote_as: "bgp_remote_as"
+                  address_families:
+                    - type: "ipv4-unicast"
+              redistribute:
+                - protocol: "omp"
 
-    # --- Corporate VPN (Corp - VPN 10) ---
-    vpn_10:
-      name: "Corp"
-      description: "DC Corporate Core Segment"
-      interfaces:
-        - name: "GigabitEthernet3"
-          description: "LAN Interface - DC Core Corp Network"
-          ip_address: "vpn10_lan_ip"
-      bgp:
-        as_number: "bgp_as"
-        router_id: "system_ip"
-        neighbors:
-          - ip_address: "vpn10_bgp_neighbor_ip"
-            remote_as: "bgp_remote_as"
-            address_families:
-              - type: "ipv4-unicast"
-        redistribute:
-          - protocol: "omp"
+          # --- Guest VPN (Guest - VPN 20) ---
+          - vpn_id: 20
+            name: "Guest"
+            description: "DC Core Guest Segment"
+            ethernet_interfaces:
+              - name: "GigabitEthernet4"
+                description: "LAN Interface - DC Core Guest Network"
+                ip_address: "vpn20_lan_ip"
+            bgp:
+              as_number: "bgp_as"
+              router_id: "system_ip"
+              neighbors:
+                - ip_address: "vpn20_bgp_neighbor_ip"
+                  remote_as: "bgp_remote_as"
+                  address_families:
+                    - type: "ipv4-unicast"
+              redistribute:
+                - protocol: "omp"
 
-    # --- Guest VPN (Guest - VPN 20) ---
-    vpn_20:
-      name: "Guest"
-      description: "DC Core Guest Segment"
-      interfaces:
-        - name: "GigabitEthernet4"
-          description: "LAN Interface - DC Core Guest Network"
-          ip_address: "vpn20_lan_ip"
-      bgp:
-        as_number: "bgp_as"
-        router_id: "system_ip"
-        neighbors:
-          - ip_address: "vpn20_bgp_neighbor_ip"
-            remote_as: "bgp_remote_as"
-            address_families:
-              - type: "ipv4-unicast"
-        redistribute:
-          - protocol: "omp"
-
-    # --- IoT VPN (IoT - VPN 30) ---
-    vpn_30:
-      name: "IoT"
-      description: "DC Core IoT Segment"
-      interfaces:
-        - name: "GigabitEthernet5"
-          description: "LAN Interface - DC Core IoT Network"
-          ip_address: "vpn30_lan_ip"
-      bgp:
-        as_number: "bgp_as"
-        router_id: "system_ip"
-        neighbors:
-          - ip_address: "vpn30_bgp_neighbor_ip"
-            remote_as: "bgp_remote_as"
-            address_families:
-              - type: "ipv4-unicast"
-        redistribute:
-          - protocol: "omp"
+          # --- IoT VPN (IoT - VPN 30) ---
+          - vpn_id: 30
+            name: "IoT"
+            description: "DC Core IoT Segment"
+            ethernet_interfaces:
+              - name: "GigabitEthernet5"
+                description: "LAN Interface - DC Core IoT Network"
+                ip_address: "vpn30_lan_ip"
+            bgp:
+              as_number: "bgp_as"
+              router_id: "system_ip"
+              neighbors:
+                - ip_address: "vpn30_bgp_neighbor_ip"
+                  remote_as: "bgp_remote_as"
+                  address_families:
+                    - type: "ipv4-unicast"
+              redistribute:
+                - protocol: "omp"
