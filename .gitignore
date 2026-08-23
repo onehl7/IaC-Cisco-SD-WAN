@@ -26,3 +26,6 @@ terraform.rc
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# Local agent workspace settings and credentials
+.agents/
