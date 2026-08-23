@@ -348,3 +348,18 @@ In this pattern, **GitHub Enterprise Actions** manages the pipeline steps (using
    - The GHE runner executes the job steps, logging in via the HashiCorp `setup-terraform` Action.
    - Running `terraform plan` or `terraform apply` on the GHE runner streams logs to TFE.
    - Since the `cloud` block is active in `providers.tf`, TFE locks the state file and records the run history, while the actual API execution runs securely via your on-premises GHE runner.
+
+---
+
+## 12. CI/CD Pipeline Pause Status
+
+> [!WARNING]
+> The GitHub Actions CI/CD validation and deployment pipeline ([`sdwan-ci-cd.yml.disabled`](file:///.github/workflows/sdwan-ci-cd.yml.disabled)) is currently **temporarily paused** by suffixing the file with `.disabled`. This prevents automated workflow runs from triggering or failing while the on-premises self-hosted runner (`on-prem-netops`) is offline.
+
+### How to Re-enable the Pipeline:
+Once your on-premises GitHub runner is online and registered to target this repository, you can re-enable the pipeline by running:
+```bash
+git mv .github/workflows/sdwan-ci-cd.yml.disabled .github/workflows/sdwan-ci-cd.yml
+git commit -m "Re-enable GitHub Actions CI/CD Pipeline"
+git push origin main
+```
