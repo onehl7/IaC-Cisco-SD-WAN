@@ -9,8 +9,7 @@ sdwan:
   configuration_groups:
     - name: "DC_Cluster_Group"
       description: "Configuration Group for Datacenter Core/WAN Edge Aggregation Routers"
-      profiles:
-        - name: "System_Base_Profile"
-        - name: "Transport_WAN_Profile"
-        - name: "Management_OOB_Profile"
-        - name: "Service_DC_LAN_Profile"
+      system_profile: "System_Base_Profile"
+      transport_profile: "Transport_WAN_Profile"
+      service_profile: "Service_DC_LAN_Profile"
+

@@ -9,8 +9,7 @@ sdwan:
   configuration_groups:
     - name: "Branch_XLarge_Group"
       description: "Configuration Group for Aggregation/XL Sites (Catalyst C8475-G2 Routers)"
-      profiles:
-        - name: "System_Base_Profile"
-        - name: "Transport_WAN_Profile"
-        - name: "Management_OOB_Profile"
-        - name: "Service_Branch_LAN_Profile"
+      system_profile: "System_Base_Profile"
+      transport_profile: "Transport_WAN_Profile"
+      service_profile: "Service_Branch_LAN_Profile"
+

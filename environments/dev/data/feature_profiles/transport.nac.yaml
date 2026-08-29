@@ -1,41 +1,35 @@
 # ==============================================================================
-# TRANSPORT FEATURE PROFILE (VPN 0) - INSTRUCTIONAL TEMPLATE
+# TRANSPORT FEATURE PROFILE (VPN 0 & VPN 512) - INSTRUCTIONAL TEMPLATE
 # ==============================================================================
-# Configures external-facing WAN links, tunnel interfaces, and underlay routing.
-# These physical interfaces terminate MPLS and Business Internet tunnels.
+# Configures external-facing WAN links (VPN 0) and isolated OOB management (VPN 512).
+# These physical interfaces terminate MPLS, Business Internet, and OOB management links.
 #
 # CUSTOMIZATION GUIDELINE:
-# - The interface names ("GigabitEthernet1", "GigabitEthernet2") are mapped to
-#   physical ports on the Catalyst 8000 series routers (e.g. C8235, C8355, C8475, C8500).
+# - The interface names ("GigabitEthernet0", "GigabitEthernet1", "GigabitEthernet2")
+#   are mapped to physical ports on Catalyst 8000 series routers (C8235, C8355, C8475, C8500).
 #   Update these names if your hardware topology uses different port layouts.
-# - Next-hops and IP variables (e.g., "vpn0_ge1_ip", "vpn0_ge1_gateway") are placeholders
-#   that must be defined per-device in the site YAML files (under data/sites/).
-# - Colors ("mpls", "biz-internet") determine the carrier path type and are used
-#   by App-Aware Routing (AAR) policies to select active paths.
+# - Next-hops and IP variables are defined per-device in the site YAML files (under data/sites/).
+# - Colors ("mpls", "biz-internet") determine carrier path types for AAR policies.
 # ==============================================================================
 ---
 sdwan:
   feature_profiles:
     transport_profiles:
       - name: "Transport_WAN_Profile"
-        description: "Transport configuration for Dual-WAN Uplinks (MPLS and Biz Internet)"
+        description: "Transport configuration for Dual-WAN Uplinks (MPLS & Biz Internet) and OOB Mgmt"
         
+        # --- WAN Transport (VPN 0) ---
         wan_vpn:
           name: "wan_vpn"
           
-          # Static default route allocations for the WAN carrier networks.
-          # Note: Next-hop values are dynamically resolved per-router from the site files.
-          # Subject to change based on carrier static routing requirements.
           static_routes:
             - prefix: "0.0.0.0/0"
-              next_hop: "vpn0_ge1_gateway" # Resolved from site-specific values (e.g. MPLS gateway)
+              next_hop: "vpn0_ge1_gateway" # Resolved from site-specific values (MPLS gateway)
             - prefix: "0.0.0.0/0"
-              next_hop: "vpn0_ge2_gateway" # Resolved from site-specific values (e.g. Internet gateway)
+              next_hop: "vpn0_ge2_gateway" # Resolved from site-specific values (Internet gateway)
 
           ethernet_interfaces:
             # --- MPLS WAN Interface ---
-            # Configures WAN Tunnel terminating the Private MPLS circuit.
-            # IP Address is dynamically assigned per-router from site variables.
             - name: "GigabitEthernet1"
               description: "WAN Uplink - MPLS Provider"
               ip_address: "vpn0_ge1_ip" # Reference variable mapped in site files
@@ -48,8 +42,6 @@ sdwan:
                   - "netconf"
 
             # --- Business Internet WAN Interface ---
-            # Configures WAN Tunnel terminating the Public Internet circuit.
-            # IP Address is dynamically assigned per-router from site variables.
             - name: "GigabitEthernet2"
               description: "WAN Uplink - Business Internet"
               ip_address: "vpn0_ge2_ip" # Reference variable mapped in site files
@@ -61,3 +53,16 @@ sdwan:
                   - "dns"
                   - "ntp"
                   - "netconf"
+
+        # --- Out-Of-Band Management (VPN 512) ---
+        management_vpn:
+          name: "management_vpn"
+          
+          static_routes:
+            - prefix: "0.0.0.0/0"
+              next_hop: "vpn512_mgmt_gateway" # Resolved from site-specific variables
+              
+          ethernet_interfaces:
+            - name: "GigabitEthernet0" # Standard OOB management interface on Catalyst 8000
+              description: "OOB LAN Management Connection"
+              ip_address: "vpn512_mgmt_ip" # Resolved from site-specific variables

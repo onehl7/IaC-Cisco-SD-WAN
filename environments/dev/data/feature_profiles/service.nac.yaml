@@ -25,7 +25,7 @@ sdwan:
       - name: "Service_Branch_LAN_Profile"
         description: "Service VPNs (10, 20, 30) for Branch Sites running OSPF"
         
-        service_vpn:
+        lan_vpns:
           # --- Corporate VPN (Corp - VPN 10) ---
           - vpn_id: 10
             name: "Corp"
@@ -95,7 +95,7 @@ sdwan:
       - name: "Service_DC_LAN_Profile"
         description: "Service VPNs (10, 20, 30) for Data Centers running BGP"
         
-        service_vpn:
+        lan_vpns:
           # --- Corporate VPN (Corp - VPN 10) ---
           - vpn_id: 10
             name: "Corp"
